@@ -33,7 +33,7 @@ class PasswordGenerator:
         length_frame.grid(row=1, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 15))
         
         self.length_var = tk.IntVar(value=12)
-        length_scale = ttk.Scale(length_frame, from_=4, to=50, 
+        length_scale = ttk.Scale(length_frame, from_=4, to=128, 
                                 variable=self.length_var, orient=tk.HORIZONTAL,
                                 command=self.on_length_change)
         length_scale.grid(row=0, column=0, sticky=(tk.W, tk.E), padx=(0, 15))
@@ -43,7 +43,7 @@ class PasswordGenerator:
         length_label.grid(row=0, column=1)
         
         # 添加长度范围提示
-        length_hint = ttk.Label(length_frame, text="(4-50)", 
+        length_hint = ttk.Label(length_frame, text="(4-128)", 
                                font=("Arial", 10), foreground="gray")
         length_hint.grid(row=1, column=0, columnspan=2, pady=(5, 0))
         
@@ -131,7 +131,7 @@ class PasswordGenerator:
             # 将滑块值转换为整数
             int_value = int(float(value))
             # 确保值在有效范围内
-            int_value = max(4, min(50, int_value))
+            int_value = max(4, min(128, int_value))
             # 更新变量
             self.length_var.set(int_value)
         except (ValueError, TypeError):
