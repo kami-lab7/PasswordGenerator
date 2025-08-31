@@ -39,7 +39,7 @@ def build_app():
         # 使用PyInstaller构建应用
         cmd = [
             'pyinstaller',
-            '--onefile',           # 打包成单个文件
+            '--onedir',            # 打包成目录（更容易控制图标）
             '--windowed',          # 无控制台窗口
             '--name=随机密码生成器',  # 应用名称
             '--distpath=dist',     # 输出目录
@@ -71,22 +71,39 @@ def create_app_bundle():
     app_name = "随机密码生成器"
     app_path = f"dist/{app_name}.app"
     
-    # 创建.app包结构
-    os.makedirs(f"{app_path}/Contents/MacOS", exist_ok=True)
-    os.makedirs(f"{app_path}/Contents/Resources", exist_ok=True)
-    
-    # 复制可执行文件
-    executable_path = f"dist/{app_name}"
-    if os.path.exists(executable_path):
-        shutil.copy2(executable_path, f"{app_path}/Contents/MacOS/{app_name}")
-        os.chmod(f"{app_path}/Contents/MacOS/{app_name}", 0o755)
-        print(f"   复制可执行文件到: {app_path}/Contents/MacOS/")
-    else:
-        print(f"❌ 未找到可执行文件: {executable_path}")
-        return False
-    
-    # 创建Info.plist文件
-    info_plist = f"""{app_path}/Contents/Info.plist
+    # 检查PyInstaller输出
+    pyinstaller_output = f"dist/{app_name}"
+    if os.path.isdir(pyinstaller_output):
+        print(f"   检测到PyInstaller目录输出: {pyinstaller_output}")
+        
+        # 如果PyInstaller已经创建了.app包，直接使用
+        if os.path.exists(f"{pyinstaller_output}.app"):
+            print(f"   PyInstaller已创建.app包，直接使用")
+            return True
+        
+        # 创建.app包结构
+        os.makedirs(f"{app_path}/Contents/MacOS", exist_ok=True)
+        os.makedirs(f"{app_path}/Contents/Resources", exist_ok=True)
+        
+        # 复制可执行文件
+        executable_path = f"{pyinstaller_output}/{app_name}"
+        if os.path.exists(executable_path):
+            shutil.copy2(executable_path, f"{app_path}/Contents/MacOS/{app_name}")
+            os.chmod(f"{app_path}/Contents/MacOS/{app_name}", 0o755)
+            print(f"   复制可执行文件到: {app_path}/Contents/MacOS/")
+        else:
+            print(f"❌ 未找到可执行文件: {executable_path}")
+            return False
+        
+        # 复制图标文件
+        if os.path.exists("icon.icns"):
+            shutil.copy2("icon.icns", f"{app_path}/Contents/Resources/icon.icns")
+            print(f"   复制图标文件到: {app_path}/Contents/Resources/")
+        else:
+            print(f"⚠️  未找到图标文件: icon.icns")
+        
+        # 创建Info.plist文件
+        info_plist = f"""{app_path}/Contents/Info.plist
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -115,19 +132,24 @@ def create_app_bundle():
     <true/>
     <key>NSPrincipalClass</key>
     <string>NSApplication</string>
+    <key>CFBundleIconFile</key>
+    <string>icon.icns</string>
 </dict>
 </plist>"""
-    
-    with open(f"{app_path}/Contents/Info.plist", 'w', encoding='utf-8') as f:
-        f.write(info_plist)
-    
-    print(f"   创建Info.plist文件")
-    
-    # 删除原始可执行文件
-    os.remove(executable_path)
-    print(f"   清理临时文件")
-    
-    return True
+        
+        with open(f"{app_path}/Contents/Info.plist", 'w', encoding='utf-8') as f:
+            f.write(info_plist)
+        
+        print(f"   创建Info.plist文件")
+        
+        # 清理PyInstaller输出目录
+        shutil.rmtree(pyinstaller_output)
+        print(f"   清理PyInstaller临时文件")
+        
+        return True
+    else:
+        print(f"❌ 未找到PyInstaller输出: {pyinstaller_output}")
+        return False
 
 def check_app():
     """检查生成的应用程序"""
@@ -198,6 +220,7 @@ def main():
                 print("📁 应用程序位置: dist/随机密码生成器.app")
                 print("💡 你可以将这个.app文件拖到Applications文件夹中安装")
                 print("💡 或者双击直接运行")
+                print("🎨 应用图标已设置，重启Finder后可见")
             else:
                 print("❌ 应用检查失败")
         else:
