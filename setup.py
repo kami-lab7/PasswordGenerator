@@ -4,7 +4,7 @@ APP = ['password_generator.py']
 DATA_FILES = []
 OPTIONS = {
     'argv_emulation': False,
-    'iconfile': None,  # 可以添加自定义图标文件路径
+    'iconfile': 'icon.icns',  # 使用自定义图标文件
     'plist': {
         'CFBundleName': '随机密码生成器',
         'CFBundleDisplayName': '随机密码生成器',

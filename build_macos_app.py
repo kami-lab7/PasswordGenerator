@@ -45,6 +45,7 @@ def build_app():
             '--distpath=dist',     # 输出目录
             '--workpath=build',    # 工作目录
             '--clean',             # 清理临时文件
+            '--icon=icon.icns',    # 应用图标
             'password_generator.py'
         ]
         
