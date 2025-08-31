@@ -34,12 +34,18 @@ class PasswordGenerator:
         
         self.length_var = tk.IntVar(value=12)
         length_scale = ttk.Scale(length_frame, from_=4, to=50, 
-                                variable=self.length_var, orient=tk.HORIZONTAL)
+                                variable=self.length_var, orient=tk.HORIZONTAL,
+                                command=self.on_length_change)
         length_scale.grid(row=0, column=0, sticky=(tk.W, tk.E), padx=(0, 15))
         
         length_label = ttk.Label(length_frame, textvariable=self.length_var, 
                                 font=("Arial", 14, "bold"), width=3)
         length_label.grid(row=0, column=1)
+        
+        # 添加长度范围提示
+        length_hint = ttk.Label(length_frame, text="(4-50)", 
+                               font=("Arial", 10), foreground="gray")
+        length_hint.grid(row=1, column=0, columnspan=2, pady=(5, 0))
         
         # 字符类型选择
         chars_frame = ttk.LabelFrame(main_frame, text="字符类型", padding="15")
@@ -118,6 +124,19 @@ class PasswordGenerator:
         # 设置最小窗口大小
         self.root.update()
         self.root.minsize(600, 700)
+    
+    def on_length_change(self, value):
+        """滑块值变化时的回调函数，确保值为整数"""
+        try:
+            # 将滑块值转换为整数
+            int_value = int(float(value))
+            # 确保值在有效范围内
+            int_value = max(4, min(50, int_value))
+            # 更新变量
+            self.length_var.set(int_value)
+        except (ValueError, TypeError):
+            # 如果转换失败，重置为默认值
+            self.length_var.set(12)
         
     def generate_password(self):
         """生成随机密码"""
